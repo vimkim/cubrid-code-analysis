@@ -29,13 +29,23 @@ TEMPLATE = """\
 <body>
   <nav>
     <a href="{root}index.html" class="logo">CUBRID Code Analysis</a>
-    {nav_links}
+    <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')" aria-label="Toggle sidebar">&#9776;</button>
   </nav>
-  <main>
-    <article>
-      {content}
-    </article>
-  </main>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3>Pages</h3>
+        <ul>
+          {sidebar_links}
+        </ul>
+      </div>
+    </aside>
+    <main>
+      <article>
+        {content}
+      </article>
+    </main>
+  </div>
   <footer>
     <p>CUBRID Code Analysis &mdash; Generated with a custom static site builder</p>
   </footer>
@@ -112,12 +122,71 @@ nav a {
 
 nav a:hover { opacity: 1; }
 
+.sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--nav-fg);
+  font-size: 1.4rem;
+  cursor: pointer;
+  margin-left: auto;
+  padding: 0.2rem 0.5rem;
+}
+
+.layout {
+  display: flex;
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid var(--border);
+  background: var(--bg-alt);
+  position: sticky;
+  top: 49px;
+  height: calc(100vh - 49px);
+  overflow-y: auto;
+}
+
+.sidebar h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-muted);
+  margin-bottom: 0.5rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li { margin: 0; }
+
+.sidebar a {
+  display: block;
+  padding: 0.35rem 0.5rem;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.875rem;
+  border-radius: 4px;
+}
+
+.sidebar a:hover { background: var(--border); }
+.sidebar a.active { background: var(--accent); color: #fff; font-weight: 600; }
+
 main {
   max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 2rem 2rem;
   width: 100%;
   flex: 1;
+  min-width: 0;
 }
 
 article h1 { font-size: 2rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
@@ -194,7 +263,22 @@ footer {
   border-top: 1px solid var(--border);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .sidebar-toggle { display: block; }
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 49px;
+    height: calc(100vh - 49px);
+    z-index: 99;
+    transition: left 0.2s ease;
+    border-right: 1px solid var(--border);
+    box-shadow: none;
+  }
+  .sidebar-open .sidebar {
+    left: 0;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+  }
   main { padding: 1rem; }
   article h1 { font-size: 1.5rem; }
   article pre { font-size: 0.8em; }
@@ -283,14 +367,13 @@ def collect_pages(content_dir: Path) -> list[dict]:
     return pages
 
 
-def build_nav(pages: list[dict], current_rel: Path, root: str) -> str:
+def build_sidebar(pages: list[dict], current_rel: Path, root: str) -> str:
     links = []
     for p in pages:
-        if p["html_rel"] == Path("index.html"):
-            continue  # index is already the logo link
-        cls = ' style="opacity:1;font-weight:600"' if p["html_rel"] == current_rel else ""
-        links.append(f'<a href="{root}{p["html_rel"]}"{cls}>{p["title"]}</a>')
-    return " ".join(links)
+        cls = ' class="active"' if p["html_rel"] == current_rel else ""
+        label = "Home" if p["html_rel"] == Path("index.html") else p["title"]
+        links.append(f'<li><a href="{root}{p["html_rel"]}"{cls}>{label}</a></li>')
+    return "\n          ".join(links)
 
 
 def build():
@@ -335,11 +418,11 @@ def build():
         depth = len(page["html_rel"].parts) - 1
         root = "../" * depth if depth > 0 else ""
 
-        nav = build_nav(pages, page["html_rel"], root)
+        sidebar = build_sidebar(pages, page["html_rel"], root)
         html = TEMPLATE.format(
             title=page["title"],
             content=html_content,
-            nav_links=nav,
+            sidebar_links=sidebar,
             root=root,
         )
 
