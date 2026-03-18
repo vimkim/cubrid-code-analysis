@@ -1,9 +1,7 @@
 # CUBRID Code Analysis
 
-Welcome! Add your analysis markdown files to the `content/` directory and run `python build.py`.
+A collection of in-depth code analysis and notes on the [CUBRID](https://github.com/CUBRID/cubrid) database engine internals.
 
-## Getting Started
+## Topics
 
-1. Put `.md` files in `content/`
-2. Run `python build.py`
-3. Serve with `python -m http.server -d site 8000`
+*Articles coming soon.*
