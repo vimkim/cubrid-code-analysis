@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title} - CUBRID Code Analysis</title>
+  <link rel="stylesheet" href="{root}style.css">
+  <link rel="stylesheet" href="{root}highlight.css">
+</head>
+<body>
+  <nav>
+    <a href="{root}index.html" class="logo">CUBRID Code Analysis</a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"></button>
+    <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')" aria-label="Toggle sidebar">&#9776;</button>
+  </nav>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3>Pages</h3>
+        <ul>
+          {sidebar_links}
+        </ul>
+      </div>
+    </aside>
+    <main>
+      <article>
+        {content}
+      </article>
+    </main>
+  </div>
+  <footer>
+    <p>CUBRID Code Analysis &mdash; Generated with a custom static site builder</p>
+  </footer>
+  <script src="{root}theme.js"></script>
+</body>
+</html>
