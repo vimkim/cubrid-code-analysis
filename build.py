@@ -29,6 +29,7 @@ TEMPLATE = """\
 <body>
   <nav>
     <a href="{root}index.html" class="logo">CUBRID Code Analysis</a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"></button>
     <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')" aria-label="Toggle sidebar">&#9776;</button>
   </nav>
   <div class="layout">
@@ -49,6 +50,7 @@ TEMPLATE = """\
   <footer>
     <p>CUBRID Code Analysis &mdash; Generated with a custom static site builder</p>
   </footer>
+  <script src="{root}theme.js"></script>
 </body>
 </html>
 """
@@ -80,6 +82,46 @@ CSS = """\
     --nav-fg: #e6edf3;
   }
 }
+
+/* Manual light theme (soft grey, easy on eyes) */
+[data-theme="light"] {
+  --bg: #d8dce0;
+  --bg-alt: #cdd2d7;
+  --fg: #1f2328;
+  --fg-muted: #636c76;
+  --accent: #0969da;
+  --border: #d0d7de;
+  --code-bg: #cdd2d7;
+  --nav-bg: #24292f;
+  --nav-fg: #ffffff;
+}
+
+/* Manual dark theme */
+[data-theme="dark"] {
+  --bg: #0d1117;
+  --bg-alt: #161b22;
+  --fg: #e6edf3;
+  --fg-muted: #8b949e;
+  --accent: #58a6ff;
+  --border: #30363d;
+  --code-bg: #161b22;
+  --nav-bg: #010409;
+  --nav-fg: #e6edf3;
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: var(--nav-fg);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.theme-toggle:hover { border-color: rgba(255,255,255,0.6); }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -129,7 +171,6 @@ nav a:hover { opacity: 1; }
   color: var(--nav-fg);
   font-size: 1.4rem;
   cursor: pointer;
-  margin-left: auto;
   padding: 0.2rem 0.5rem;
 }
 
@@ -345,6 +386,22 @@ HIGHLIGHT_CSS = """\
 """
 
 
+THEME_JS = """\
+function getTheme() { return localStorage.getItem('theme'); }
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  var btn = document.querySelector('.theme-toggle');
+  if (btn) btn.textContent = t === 'light' ? 'Dark mode' : 'Light mode';
+}
+function toggleTheme() {
+  var t = getTheme() === 'light' ? 'dark' : 'light';
+  localStorage.setItem('theme', t);
+  applyTheme(t);
+}
+applyTheme(getTheme() || 'dark');
+"""
+
+
 def title_from_filename(path: Path) -> str:
     return path.stem.replace("-", " ").replace("_", " ").title()
 
@@ -391,6 +448,7 @@ def build():
 
     (SITE_DIR / "style.css").write_text(CSS, encoding="utf-8")
     (SITE_DIR / "highlight.css").write_text(HIGHLIGHT_CSS, encoding="utf-8")
+    (SITE_DIR / "theme.js").write_text(THEME_JS, encoding="utf-8")
 
     if not CONTENT_DIR.exists():
         CONTENT_DIR.mkdir(parents=True)
